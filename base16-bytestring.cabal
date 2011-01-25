@@ -1,9 +1,9 @@
 name:                base16-bytestring
-version:             0.1.1.0
+version:             0.1.1.1
 synopsis:            Fast base16 (hex) encoding and deconding for ByteStrings
 description:         Fast base16 (hex) encoding and deconding for ByteStrings
 homepage:            http://github.com/mailrank/base16-bytestring
-bug-reports:         http://girhub.co/mailrank/base16-bytestring/issues
+bug-reports:         http://github.com/mailrank/base16-bytestring/issues
 license:             BSD3
 license-file:        LICENSE
 copyright:           Copyright 2011 MailRank, Inc.
