@@ -31,9 +31,16 @@ digits :: ByteString
 digits = "0123456789abcdef"
 {-# NOINLINE digits #-}
 
+-- | Encode a string into base16 form.  The result will always be a
+-- multiple of 2 bytes in length.
+--
+-- Example:
+--
+-- > encode "foo"  == "666f6f"
 encode :: ByteString -> ByteString
 encode (PS sfp soff slen)
-    | slen > maxBound `div` 2 = error "Data.ByteString.Base16.encode: input too large"
+    | slen > maxBound `div` 2 =
+        error "Data.ByteString.Base16.encode: input too long"
     | otherwise = unsafeCreate (slen*2) $ \dptr ->
                     withForeignPtr sfp $ \sptr ->
                       enc (sptr `plusPtr` soff) dptr
@@ -47,6 +54,15 @@ encode (PS sfp soff slen)
       poke (d `plusPtr` 1) . unsafeIndex digits $ x .&. 0xf
       go (s `plusPtr` 1) (d `plusPtr` 2)
 
+-- | Decode a string from base16 form. The first element of the
+-- returned tuple contains the decoded data. The second element starts
+-- at the first invalid base16 sequence in the original string.
+--
+-- Examples:
+--
+-- > decode "666f6f"  == ("foo", "")
+-- > decode "66quux"  == ("f", "quux")
+-- > decode "666quux" == ("f", "6quux")
 decode :: ByteString -> (ByteString, ByteString)
 decode (PS sfp soff slen) =
   unsafePerformIO . createAndTrim' (slen `div` 2) $ \dptr ->
