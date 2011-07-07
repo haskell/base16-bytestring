@@ -1,4 +1,4 @@
-name:           base15-bytestring-benchmarks
+name:           base16-bytestring-benchmarks
 version:        0
 cabal-version:  >= 1.8
 build-type:     Simple
