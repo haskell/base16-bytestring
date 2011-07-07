@@ -1,4 +1,4 @@
-{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE BangPatterns, OverloadedStrings #-}
 
 -- |
 -- Module      : Data.ByteString.Base16
@@ -20,16 +20,13 @@ module Data.ByteString.Base16
 import Data.Bits ((.&.), shiftL, shiftR)
 import Data.ByteString.Char8 (empty)
 import Data.ByteString.Internal (ByteString(..), createAndTrim', unsafeCreate)
-import Data.ByteString.Unsafe (unsafeIndex)
 import Data.Word (Word8)
+import Control.Monad (forM_)
+import Foreign.Marshal.Alloc (mallocBytes)
 import Foreign.ForeignPtr (ForeignPtr, withForeignPtr)
 import Foreign.Ptr (Ptr, minusPtr, plusPtr)
 import Foreign.Storable (peek, poke)
 import System.IO.Unsafe (unsafePerformIO)
-
-digits :: ByteString
-digits = "0123456789abcdef"
-{-# NOINLINE digits #-}
 
 -- | Encode a string into base16 form.  The result will always be a
 -- multiple of 2 bytes in length.
@@ -50,9 +47,16 @@ encode (PS sfp soff slen)
     go s d | s == e = return ()
            | otherwise = do
       x <- peek8 s
-      poke d . unsafeIndex digits $ x `shiftR` 4
-      poke (d `plusPtr` 1) . unsafeIndex digits $ x .&. 0xf
+      poke d =<< (peek (digits `plusPtr` (x `shiftR` 4)) :: IO Word8)
+      poke (d `plusPtr` 1) =<< (peek (digits `plusPtr` (x .&. 0xf)) :: IO Word8)
       go (s `plusPtr` 1) (d `plusPtr` 2)
+  digits :: Ptr Word8
+  !digits = unsafePerformIO $ do
+             ptr <- mallocBytes 16
+             forM_ (zip [0..] ("0123456789abcdef"::String)) $ \(i,c) ->
+               poke (ptr `plusPtr` i) ((fromIntegral (fromEnum c)) :: Word8)
+             return ptr
+  {-# NOINLINE digits #-}
 
 -- | Decode a string from base16 form. The first element of the
 -- returned tuple contains the decoded data. The second element starts
