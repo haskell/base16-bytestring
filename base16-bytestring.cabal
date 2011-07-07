@@ -1,5 +1,5 @@
 name:                base16-bytestring
-version:             0.1.1.1
+version:             0.1.1.2
 synopsis:            Fast base16 (hex) encoding and deconding for ByteStrings
 description:         Fast base16 (hex) encoding and deconding for ByteStrings
 homepage:            http://github.com/mailrank/base16-bytestring
