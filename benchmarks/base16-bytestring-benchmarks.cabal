@@ -1,0 +1,14 @@
+name:           base15-bytestring-benchmarks
+version:        0
+cabal-version:  >= 1.8
+build-type:     Simple
+
+executable bm
+  main-is: Benchmarks.hs
+
+  build-depends:
+    base,
+    base16-bytestring,
+    bytestring,
+    criterion >= 0.5.0.10,
+    text >= 0.11.0.8
