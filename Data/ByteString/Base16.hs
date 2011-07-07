@@ -1,4 +1,4 @@
-{-# LANGUAGE BangPatterns, OverloadedStrings #-}
+{-# LANGUAGE BangPatterns #-}
 
 -- |
 -- Module      : Data.ByteString.Base16
@@ -17,13 +17,13 @@ module Data.ByteString.Base16
     , decode
     ) where
 
+import Control.Monad (forM_)
 import Data.Bits ((.&.), shiftL, shiftR)
 import Data.ByteString.Char8 (empty)
 import Data.ByteString.Internal (ByteString(..), createAndTrim', unsafeCreate)
 import Data.Word (Word8)
-import Control.Monad (forM_)
-import Foreign.Marshal.Alloc (mallocBytes)
 import Foreign.ForeignPtr (ForeignPtr, withForeignPtr)
+import Foreign.Marshal.Alloc (mallocBytes)
 import Foreign.Ptr (Ptr, minusPtr, plusPtr)
 import Foreign.Storable (peek, poke)
 import System.IO.Unsafe (unsafePerformIO)
@@ -53,7 +53,7 @@ encode (PS sfp soff slen)
   digits :: Ptr Word8
   !digits = unsafePerformIO $ do
              ptr <- mallocBytes 16
-             forM_ (zip [0..] ("0123456789abcdef"::String)) $ \(i,c) ->
+             forM_ (zip [0..] "0123456789abcdef") $ \(i,c) ->
                poke (ptr `plusPtr` i) ((fromIntegral (fromEnum c)) :: Word8)
              return ptr
   {-# NOINLINE digits #-}
