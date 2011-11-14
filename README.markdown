@@ -18,7 +18,7 @@ This library is written in pure Haskell, and it's fast:
 # Get involved!
 
 Please report bugs via the
-[bitbucket issue tracker](http://github.com/bos/base16-bytestring).
+[github issue tracker](http://github.com/bos/base16-bytestring).
 
 Master [github repository](http://github.com/bos/base16-bytestring):
 
