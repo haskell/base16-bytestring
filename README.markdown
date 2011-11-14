@@ -18,11 +18,11 @@ This library is written in pure Haskell, and it's fast:
 # Get involved!
 
 Please report bugs via the
-[bitbucket issue tracker](http://github.com/mailrank/base16-bytestring).
+[bitbucket issue tracker](http://github.com/bos/base16-bytestring).
 
-Master [github repository](http://github.com/mailrank/base16-bytestring):
+Master [github repository](http://github.com/bos/base16-bytestring):
 
-* `git clone git://github.com/mailrank/base16-bytestring.git`
+* `git clone git://github.com/bos/base16-bytestring.git`
 
 There's also a [Mercurial mirror](http://bitbucket.org/bos/base16-bytestring):
 
@@ -34,4 +34,4 @@ There's also a [Mercurial mirror](http://bitbucket.org/bos/base16-bytestring):
 # Authors
 
 This library is written and maintained by Bryan O'Sullivan,
-<bos@mailrank.com>.
+<bos@serpentine.com>.
