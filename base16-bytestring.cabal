@@ -23,7 +23,8 @@ library
   
   build-depends:
     base == 4.*,
-    bytestring == 0.9.*
+    bytestring == 0.9.*,
+    ghc-prim
 
   ghc-options: -Wall -funbox-strict-fields
   ghc-prof-options: -auto-all
