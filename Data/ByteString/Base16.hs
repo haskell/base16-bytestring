@@ -116,7 +116,7 @@ decode (PS sfp soff slen) =
           poke d . fromIntegral $ lo + (hi `shiftL` 4)
           go (s `plusPtr` 2) (d `plusPtr` 1)
 
-    hex (I# index) = W8# $ indexWord8OffAddr# table index
+    hex (I# index) = W8# (indexWord8OffAddr# table index)
     !table =
         "\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\
         \\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\
