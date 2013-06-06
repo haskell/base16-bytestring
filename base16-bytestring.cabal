@@ -14,7 +14,7 @@ category:            Data
 build-type:          Simple
 extra-source-files:  README.markdown
 
-Cabal-version:       >=1.6
+Cabal-version:       >=1.8
 
 library
   exposed-modules:
@@ -36,3 +36,11 @@ source-repository head
 source-repository head
   type:     mercurial
   location: http://bitbucket.org/bos/base16-bytestring
+
+test-suite test
+  type: exitcode-stdio-1.0
+  hs-source-dirs: tests
+  main-is: Tests.hs
+  build-depends: base
+               , base16-bytestring
+               , bytestring
