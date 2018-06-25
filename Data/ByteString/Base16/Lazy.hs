@@ -21,6 +21,7 @@ import Data.Word (Word8)
 import qualified Data.ByteString.Base16 as B16
 import qualified Data.ByteString as B
 import qualified Data.ByteString.Unsafe as B
+import qualified Data.ByteString.Lazy as BL
 import Data.ByteString.Lazy.Internal
 
 -- | Encode a string into base16 form.  The result will always be a
@@ -38,8 +39,6 @@ encode Empty        = Empty
 -- at the first invalid base16 sequence in the original string.
 --
 -- This function operates as lazily as possible over the input chunks.
--- The only instance in which it is non-lazy is if an odd-length chunk
--- ends with a byte that is valid base16.
 --
 -- Examples:
 --
@@ -47,16 +46,21 @@ encode Empty        = Empty
 -- > decode "66quux"  == ("f", "quux")
 -- > decode "666quux" == ("f", "6quux")
 decode :: ByteString -> (ByteString, ByteString)
-decode = foldrChunks go (Empty, Empty)
-  where go c ~(y,z)
-           | len == 0 = (chunk h y, z)
+decode = go Nothing
+  where
+      go :: Maybe Word8 -> ByteString -> (ByteString, ByteString)
+      go Nothing Empty = (Empty, Empty)
+      go (Just w) Empty = (Empty, BL.singleton w)
+      go (Just w) (Chunk c z) =
+           go Nothing (chunk (B.pack [w, B.unsafeHead c]) (chunk (B.unsafeTail c) z))
+      go Nothing (Chunk c z)
+           | len == 0 =
+                 let ~(res,tail) = go Nothing z
+                 in (chunk h res, tail)
            | len == 1 && isHex (B.unsafeHead t) =
-               case z of
-                 Chunk a as | isHex (B.unsafeHead a)
-                   -> let (q,_) = B16.decode (t `B.snoc` B.unsafeHead a)
-                      in (chunk h (chunk q y), chunk (B.unsafeTail a) as)
-                 _ -> (chunk h y, chunk t z)
-           | otherwise = (chunk h y, chunk t z)
+                 let ~(res,tail) = go (Just (B.unsafeHead t)) z
+                 in (chunk h res, tail)
+           | otherwise = (chunk h Empty, chunk t z)
             where (h,t) = B16.decode c
                   len = B.length t
 
