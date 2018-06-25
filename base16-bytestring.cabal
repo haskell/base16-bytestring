@@ -1,33 +1,32 @@
+cabal-version:       >=1.8
 name:                base16-bytestring
 version:             0.1.1.6
 synopsis:            Fast base16 (hex) encoding and decoding for ByteStrings
-description:         Fast base16 (hex) encoding and decoding for ByteStrings
-homepage:            http://github.com/bos/base16-bytestring
-bug-reports:         http://github.com/bos/base16-bytestring/issues
+description:         This package provides support for encoding and decoding binary data according to @base16@ (see also <https://tools.ietf.org/html/rfc4648 RFC 4648>) for strict and lazy ByteStrings
+homepage:            http://github.com/haskell/base16-bytestring
+bug-reports:         http://github.com/haskell/base16-bytestring/issues
 license:             BSD3
 license-file:        LICENSE
 copyright:           Copyright 2011 MailRank, Inc.
+                     Copyright 2010 Bryan O'Sullivan
 author:              Bryan O'Sullivan <bos@serpentine.com>
 maintainer:          Bryan O'Sullivan <bos@serpentine.com>
-copyright:           2010 Bryan O'Sullivan
 category:            Data
 build-type:          Simple
 extra-source-files:  README.markdown
-
-Cabal-version:       >=1.8
+tested-with: GHC==8.4.3, GHC==8.2.2, GHC==8.0.2, GHC==7.10.3, GHC==7.8.4, GHC==7.6.3, GHC==7.4.2, GHC==7.2.2, GHC==7.0.4
 
 library
   exposed-modules:
     Data.ByteString.Base16
     Data.ByteString.Base16.Lazy
-  
+
   build-depends:
     base == 4.*,
     bytestring >= 0.9,
     ghc-prim
 
   ghc-options: -Wall -funbox-strict-fields
-  ghc-prof-options: -auto-all
 
 source-repository head
   type:     git
