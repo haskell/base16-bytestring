@@ -55,11 +55,11 @@ decode = go Nothing
            go Nothing (chunk (B.pack [w, B.unsafeHead c]) (chunk (B.unsafeTail c) z))
       go Nothing (Chunk c z)
            | len == 0 =
-                 let ~(res,tail) = go Nothing z
-                 in (chunk h res, tail)
+                 let ~(res,tail') = go Nothing z
+                 in (chunk h res, tail')
            | len == 1 && isHex (B.unsafeHead t) =
-                 let ~(res,tail) = go (Just (B.unsafeHead t)) z
-                 in (chunk h res, tail)
+                 let ~(res,tail') = go (Just (B.unsafeHead t)) z
+                 in (chunk h res, tail')
            | otherwise = (chunk h Empty, chunk t z)
             where (h,t) = B16.decode c
                   len = B.length t
