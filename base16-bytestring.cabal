@@ -2,12 +2,17 @@ cabal-version:       >=1.8
 name:                base16-bytestring
 version:             0.1.1.6
 synopsis:            Fast base16 (hex) encoding and decoding for ByteStrings
-description:         This package provides support for encoding and decoding binary data according to @base16@ (see also <https://tools.ietf.org/html/rfc4648 RFC 4648>) for strict and lazy ByteStrings.
+description:         This package provides support for encoding and decoding binary data according
+                     to @base16@ (see also <https://tools.ietf.org/html/rfc4648 RFC 4648>) for
+                     strict (see "Data.ByteString.Base16") and lazy @ByteString@s (see "Data.ByteString.Base16.Lazy").
+                     .
+                     See also the <https://hackage.haskell.org/package/base-encoding base-encoding> package which
+                     provides an uniform API providing conversion paths between more binary and textual types.
 homepage:            http://github.com/haskell/base16-bytestring
 bug-reports:         http://github.com/haskell/base16-bytestring/issues
 license:             BSD3
 license-file:        LICENSE
-copyright:           Copyright 2011 MailRank, Inc.
+copyright:           Copyright 2011 MailRank, Inc.;
                      Copyright 2010 Bryan O'Sullivan
 author:              Bryan O'Sullivan <bos@serpentine.com>
 maintainer:          Herbert Valerio Riedel <hvr@gnu.org>,
