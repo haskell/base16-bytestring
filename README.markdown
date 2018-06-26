@@ -18,20 +18,15 @@ This library is written in pure Haskell, and it's fast:
 # Get involved!
 
 Please report bugs via the
-[github issue tracker](http://github.com/bos/base16-bytestring).
+[github issue tracker](http://github.com/haskell/base16-bytestring).
 
-Master [github repository](http://github.com/bos/base16-bytestring):
+Master [github repository](http://github.com/haskell/base16-bytestring):
 
-* `git clone git://github.com/bos/base16-bytestring.git`
-
-There's also a [Mercurial mirror](http://bitbucket.org/bos/base16-bytestring):
-
-* `hg clone http://bitbucket.org/bos/base16-bytestring`
-
-(You can create and contribute changes using either git or Mercurial.)
+* `git clone git://github.com/haskell/base16-bytestring.git`
 
 
 # Authors
 
 This library is written and maintained by Bryan O'Sullivan,
-<bos@serpentine.com>.
+<bos@serpentine.com>. It is maintained by Herbert Valerio Riedel,
+<hvr@gnu.org> and Mikhail Glushenkov, <mikhail.glushenkov@gmail.com>.
