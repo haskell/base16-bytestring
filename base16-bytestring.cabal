@@ -19,7 +19,7 @@ maintainer:          Herbert Valerio Riedel <hvr@gnu.org>,
                      Mikhail Glushenkov <mikhail.glushenkov@gmail.com>
 category:            Data
 build-type:          Simple
-extra-source-files:  README.markdown
+extra-source-files:  README.md CHANGELOG.md
 tested-with:         GHC==8.6.2,  GHC==8.4.4, GHC==8.2.2, GHC==8.0.2,
                      GHC==7.10.3, GHC==7.8.4, GHC==7.6.3,
                      GHC==7.4.2,  GHC==7.2.2, GHC==7.0.4
