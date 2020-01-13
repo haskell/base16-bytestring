@@ -20,9 +20,10 @@ maintainer:          Herbert Valerio Riedel <hvr@gnu.org>,
 category:            Data
 build-type:          Simple
 extra-source-files:  README.md CHANGELOG.md
-tested-with:         GHC==8.6.2,  GHC==8.4.4, GHC==8.2.2, GHC==8.0.2,
-                     GHC==7.10.3, GHC==7.8.4, GHC==7.6.3,
-                     GHC==7.4.2,  GHC==7.2.2, GHC==7.0.4
+tested-with:         GHC==8.8.1, GHC==8.6.5, GHC==8.4.4,
+                     GHC==8.2.2, GHC==8.0.2, GHC==7.10.3,
+                     GHC==7.8.4, GHC==7.6.3, GHC==7.4.2,
+                     GHC==7.2.2, GHC==7.0.4
 
 library
   exposed-modules:
