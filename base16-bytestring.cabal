@@ -16,7 +16,8 @@ copyright:           Copyright 2011 MailRank, Inc.;
                      Copyright 2010-2020 Bryan O'Sullivan et al.
 author:              Bryan O'Sullivan <bos@serpentine.com>
 maintainer:          Herbert Valerio Riedel <hvr@gnu.org>,
-                     Mikhail Glushenkov <mikhail.glushenkov@gmail.com>
+                     Mikhail Glushenkov <mikhail.glushenkov@gmail.com>,
+                     Emily Pillmore <emilypi@cohomolo.gy>
 category:            Data
 build-type:          Simple
 extra-source-files:  README.md CHANGELOG.md
