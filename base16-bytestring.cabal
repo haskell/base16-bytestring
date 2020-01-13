@@ -13,7 +13,7 @@ bug-reports:         http://github.com/haskell/base16-bytestring/issues
 license:             BSD3
 license-file:        LICENSE
 copyright:           Copyright 2011 MailRank, Inc.;
-                     Copyright 2010-2018 Bryan O'Sullivan et al.
+                     Copyright 2010-2020 Bryan O'Sullivan et al.
 author:              Bryan O'Sullivan <bos@serpentine.com>
 maintainer:          Herbert Valerio Riedel <hvr@gnu.org>,
                      Mikhail Glushenkov <mikhail.glushenkov@gmail.com>
