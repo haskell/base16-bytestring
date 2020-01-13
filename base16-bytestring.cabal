@@ -40,11 +40,7 @@ library
 
 source-repository head
   type:     git
-  location: http://github.com/bos/base16-bytestring
-
-source-repository head
-  type:     mercurial
-  location: http://bitbucket.org/bos/base16-bytestring
+  location: http://github.com/haskell/base16-bytestring
 
 test-suite test
   type: exitcode-stdio-1.0
