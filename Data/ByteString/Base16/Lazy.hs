@@ -1,68 +1,87 @@
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE OverloadedStrings #-}
-
+#if __GLASGOW_HASKELL__ >= 702
+{-# LANGUAGE Trustworthy #-}
+#endif
 -- |
 -- Module      : Data.ByteString.Base16.Lazy
 -- Copyright   : (c) 2011 MailRank, Inc.
 --
 -- License     : BSD
--- Maintainer  : bos@serpentine.com
--- Stability   : experimental
--- Portability : GHC
+-- Maintainer  : Herbert Valerio Riedel <hvr@gnu.org>,
+--               Mikhail Glushenkov <mikhail.glushenkov@gmail.com>,
+--               Emily Pillmore <emilypi@cohomolo.gy>
+-- Stability   : stable
+-- Portability : non-portable
 --
--- Fast and efficient encoding and decoding of base16-encoded strings.
-
+-- RFC 4648-compliant Base16 (Hexadecimal) encoding for lazy 'ByteString' values.
+--
 module Data.ByteString.Base16.Lazy
-    (
-      encode
-    , decode
-    ) where
+( encode
+, decode
+, decodeLenient
+) where
 
-import Data.Word (Word8)
+
+import qualified Data.ByteString as BS
+import qualified Data.ByteString.Lazy as LBS
 import qualified Data.ByteString.Base16 as B16
-import qualified Data.ByteString as B
-import qualified Data.ByteString.Unsafe as B
-import qualified Data.ByteString.Lazy as BL
-import Data.ByteString.Lazy.Internal
+import Data.ByteString.Base16.Internal
+import Data.ByteString.Lazy.Internal (ByteString(..))
 
--- | Encode a string into base16 form.  The result will always be a
--- multiple of 2 bytes in length.
+-- | Encode a 'ByteString' value in base16 (i.e. hexadecimal).
+-- Encoded values will always have a length that is a multiple of 2.
+-- See: <https://tools.ietf.org/html/rfc4648#section-8 RFC-4648 section 8>
 --
--- Example:
+-- === __Examples__:
 --
 -- > encode "foo"  == "666f6f"
+--
 encode :: ByteString -> ByteString
+encode Empty = Empty
 encode (Chunk c cs) = Chunk (B16.encode c) (encode cs)
-encode Empty        = Empty
 
--- | Decode a string from base16 form. The first element of the
--- returned tuple contains the decoded data. The second element starts
--- at the first invalid base16 sequence in the original string.
+-- | Decode a base16-encoded 'ByteString' value.
 --
--- This function operates as lazily as possible over the input chunks.
+-- If errors are encountered during the decoding process,
+-- then they will be returned in the @Left@ clause of the
+-- coproduct. See: <https://tools.ietf.org/html/rfc4648#section-8 RFC-4648 section 8>
 --
--- Examples:
+-- === __Examples__:
 --
--- > decode "666f6f"  == ("foo", "")
--- > decode "66quux"  == ("f", "quux")
--- > decode "666quux" == ("f", "6quux")
-decode :: ByteString -> (ByteString, ByteString)
-decode = go Nothing
+-- > decode "666f6f" == Right "foo"
+-- > decode "66quux" == Left "invalid character at offset: 2"
+-- > decode "666quu" == Left "invalid character at offset: 3"
+--
+-- @since 1.0.0.0
+--
+decode :: ByteString -> Either String ByteString
+decode Empty = Right Empty
+decode (Chunk b bs) = case B16.decode b of
+    Right b' -> case decode bs of
+      Left t -> Left t
+      Right bs' -> Right (Chunk b' bs')
+    Left t -> Left t
+
+-- | Decode a Base16-encoded 'ByteString' value leniently, using a
+-- strategy that never fails.
+--
+-- /N.B./: this is not RFC 4648-compliant
+--
+-- === __Examples__:
+--
+-- > decodeLenient "666f6f" == "foo"
+-- > decodeLenient "66quux" == "f"
+-- > decodeLenient "666quu" == "f"
+-- > decodeLenient "666fqu" == "fo"
+--
+-- @since 1.0.0.0
+--
+decodeLenient :: ByteString -> ByteString
+decodeLenient = LBS.fromChunks
+    . fmap B16.decodeLenient
+    . reChunk
+    . fmap (BS.filter (flip BS.elem hex))
+    . LBS.toChunks
   where
-      go :: Maybe Word8 -> ByteString -> (ByteString, ByteString)
-      go Nothing Empty = (Empty, Empty)
-      go (Just w) Empty = (Empty, BL.singleton w)
-      go (Just w) (Chunk c z) =
-           go Nothing (chunk (B.pack [w, B.unsafeHead c]) (chunk (B.unsafeTail c) z))
-      go Nothing (Chunk c z)
-           | len == 0 =
-                 let ~(res,tail') = go Nothing z
-                 in (chunk h res, tail')
-           | len == 1 && isHex (B.unsafeHead t) =
-                 let ~(res,tail') = go (Just (B.unsafeHead t)) z
-                 in (chunk h res, tail')
-           | otherwise = (chunk h Empty, chunk t z)
-            where (h,t) = B16.decode c
-                  len = B.length t
-
-isHex :: Word8 -> Bool
-isHex w = (w >= 48 && w <= 57) || (w >= 97 && w <= 102) || (w >= 65 && w <= 70)
+    hex = BS.pack (fmap c2w "0123456789abcdef")

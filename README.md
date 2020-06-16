@@ -5,18 +5,6 @@
 This package provides a Haskell library for working with base16-encoded
 data quickly and efficiently, using the `ByteString` type.
 
-
-# Performance
-
-This library is written in pure Haskell, and it's fast:
-
-* 250 MB/sec encoding
-
-* 200 MB/sec strict decoding (per RFC 4648)
-
-* 100 MB/sec lenient decoding
-
-
 # Get involved!
 
 Please report bugs via the
@@ -29,6 +17,7 @@ Master [Git repository](http://github.com/haskell/base16-bytestring):
 
 # Authors
 
-This library is written by [Bryan O'Sullivan](mailto:bos@serpentine.com). It
-is maintained by [Herbert Valerio Riedel](mailto:hvr@gnu.org) and [Mikhail
+This library is written by [Bryan O'Sullivan](mailto:bos@serpentine.com). 
+
+It is currently maintained by [Emily Pillmore](mailto:emilypi@cohomolo.gy), [Herbert Valerio Riedel](mailto:hvr@gnu.org) and [Mikhail
 Glushenkov](mailto:mikhail.glushenkov@gmail.com).

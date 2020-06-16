@@ -1,144 +1,116 @@
-{-# LANGUAGE BangPatterns, MagicHash #-}
-
+{-# LANGUAGE BangPatterns #-}
+{-# LANGUAGE CPP #-}
+{-# LANGUAGE MagicHash #-}
+#if __GLASGOW_HASKELL__ >= 702
+{-# LANGUAGE Trustworthy #-}
+#endif
 -- |
 -- Module      : Data.ByteString.Base16
 -- Copyright   : (c) 2011 MailRank, Inc.
 --
 -- License     : BSD
--- Maintainer  : bos@serpentine.com
--- Stability   : experimental
--- Portability : GHC
+-- Maintainer  : Herbert Valerio Riedel <hvr@gnu.org>,
+--               Mikhail Glushenkov <mikhail.glushenkov@gmail.com>,
+--               Emily Pillmore <emilypi@cohomolo.gy>
+-- Stability   : stable
+-- Portability : non-portable
 --
--- Fast and efficient encoding and decoding of base16-encoded strings.
-
+-- RFC 4648-compliant Base16 (Hexadecimal) encoding for 'ByteString' values.
+--
 module Data.ByteString.Base16
-    (
-      encode
-    , decode
-    ) where
+( encode
+, decode
+, decodeLenient
+) where
 
-import Data.ByteString.Char8 (empty)
-import Data.ByteString.Internal (ByteString(..), createAndTrim', unsafeCreate)
-import Data.Bits (shiftL)
-import Foreign.ForeignPtr (ForeignPtr, withForeignPtr)
-import Foreign.Ptr (Ptr, minusPtr, plusPtr)
-import Foreign.Storable (peek, poke)
-import System.IO.Unsafe (unsafePerformIO)
-import GHC.Prim
-import GHC.Types
-import GHC.Word
+import Data.ByteString (empty)
+import Data.ByteString.Base16.Internal
+import Data.ByteString.Internal
 
--- | Encode a string into base16 form.  The result will always be a
--- multiple of 2 bytes in length.
+import Foreign.ForeignPtr
+import Foreign.Ptr
+
+import GHC.ForeignPtr
+#if __GLASGOW_HASKELL__ >= 702
+import System.IO.Unsafe (unsafeDupablePerformIO)
+#else
+import GHC.IO (unsafeDupablePerformIO)
+#endif
+
+
+-- | Encode a 'ByteString' value in base16 (i.e. hexadecimal).
+-- Encoded values will always have a length that is a multiple of 2.
+-- See: <https://tools.ietf.org/html/rfc4648#section-8 RFC-4648 section 8>
 --
--- Example:
+-- === __Examples__:
 --
 -- > encode "foo"  == "666f6f"
+--
 encode :: ByteString -> ByteString
 encode (PS sfp soff slen)
     | slen > maxBound `div` 2 =
-        error "Data.ByteString.Base16.encode: input too long"
-    | otherwise = unsafeCreate (slen*2) $ \dptr ->
-                    withForeignPtr sfp $ \sptr ->
-                      enc (sptr `plusPtr` soff) dptr
- where
-  enc sptr = go sptr where
-    e = sptr `plusPtr` slen
-    go s d | s == e = return ()
-           | otherwise = do
-      x <- peek8 s
-      poke d (tlookup tableHi x)
-      poke (d `plusPtr` 1) (tlookup tableLo x)
-      go (s `plusPtr` 1) (d `plusPtr` 2)
-    tlookup :: Addr# -> Int -> Word8
-    tlookup table (I# index) = W8# (indexWord8OffAddr# table index)
-    !tableLo =
-      "\x30\x31\x32\x33\x34\x35\x36\x37\x38\x39\x61\x62\x63\x64\x65\x66\
-      \\x30\x31\x32\x33\x34\x35\x36\x37\x38\x39\x61\x62\x63\x64\x65\x66\
-      \\x30\x31\x32\x33\x34\x35\x36\x37\x38\x39\x61\x62\x63\x64\x65\x66\
-      \\x30\x31\x32\x33\x34\x35\x36\x37\x38\x39\x61\x62\x63\x64\x65\x66\
-      \\x30\x31\x32\x33\x34\x35\x36\x37\x38\x39\x61\x62\x63\x64\x65\x66\
-      \\x30\x31\x32\x33\x34\x35\x36\x37\x38\x39\x61\x62\x63\x64\x65\x66\
-      \\x30\x31\x32\x33\x34\x35\x36\x37\x38\x39\x61\x62\x63\x64\x65\x66\
-      \\x30\x31\x32\x33\x34\x35\x36\x37\x38\x39\x61\x62\x63\x64\x65\x66\
-      \\x30\x31\x32\x33\x34\x35\x36\x37\x38\x39\x61\x62\x63\x64\x65\x66\
-      \\x30\x31\x32\x33\x34\x35\x36\x37\x38\x39\x61\x62\x63\x64\x65\x66\
-      \\x30\x31\x32\x33\x34\x35\x36\x37\x38\x39\x61\x62\x63\x64\x65\x66\
-      \\x30\x31\x32\x33\x34\x35\x36\x37\x38\x39\x61\x62\x63\x64\x65\x66\
-      \\x30\x31\x32\x33\x34\x35\x36\x37\x38\x39\x61\x62\x63\x64\x65\x66\
-      \\x30\x31\x32\x33\x34\x35\x36\x37\x38\x39\x61\x62\x63\x64\x65\x66\
-      \\x30\x31\x32\x33\x34\x35\x36\x37\x38\x39\x61\x62\x63\x64\x65\x66\
-      \\x30\x31\x32\x33\x34\x35\x36\x37\x38\x39\x61\x62\x63\x64\x65\x66"#
-    !tableHi =
-      "\x30\x30\x30\x30\x30\x30\x30\x30\x30\x30\x30\x30\x30\x30\x30\x30\
-      \\x31\x31\x31\x31\x31\x31\x31\x31\x31\x31\x31\x31\x31\x31\x31\x31\
-      \\x32\x32\x32\x32\x32\x32\x32\x32\x32\x32\x32\x32\x32\x32\x32\x32\
-      \\x33\x33\x33\x33\x33\x33\x33\x33\x33\x33\x33\x33\x33\x33\x33\x33\
-      \\x34\x34\x34\x34\x34\x34\x34\x34\x34\x34\x34\x34\x34\x34\x34\x34\
-      \\x35\x35\x35\x35\x35\x35\x35\x35\x35\x35\x35\x35\x35\x35\x35\x35\
-      \\x36\x36\x36\x36\x36\x36\x36\x36\x36\x36\x36\x36\x36\x36\x36\x36\
-      \\x37\x37\x37\x37\x37\x37\x37\x37\x37\x37\x37\x37\x37\x37\x37\x37\
-      \\x38\x38\x38\x38\x38\x38\x38\x38\x38\x38\x38\x38\x38\x38\x38\x38\
-      \\x39\x39\x39\x39\x39\x39\x39\x39\x39\x39\x39\x39\x39\x39\x39\x39\
-      \\x61\x61\x61\x61\x61\x61\x61\x61\x61\x61\x61\x61\x61\x61\x61\x61\
-      \\x62\x62\x62\x62\x62\x62\x62\x62\x62\x62\x62\x62\x62\x62\x62\x62\
-      \\x63\x63\x63\x63\x63\x63\x63\x63\x63\x63\x63\x63\x63\x63\x63\x63\
-      \\x64\x64\x64\x64\x64\x64\x64\x64\x64\x64\x64\x64\x64\x64\x64\x64\
-      \\x65\x65\x65\x65\x65\x65\x65\x65\x65\x65\x65\x65\x65\x65\x65\x65\
-      \\x66\x66\x66\x66\x66\x66\x66\x66\x66\x66\x66\x66\x66\x66\x66\x66"#
+      error "Data.ByteString.Base16.encode: input too long"
+    | otherwise = unsafeCreate (slen * 2) $ \dptr ->
+        withForeignPtr sfp $ \sptr ->
+          encodeLoop dptr
+          (sptr `plusPtr` soff)
+          (sptr `plusPtr` (soff + slen))
 
--- | Decode a string from base16 form. The first element of the
--- returned tuple contains the decoded data. The second element starts
--- at the first invalid base16 sequence in the original string.
+-- | Decode a base16-encoded 'ByteString' value.
 --
--- Examples:
+-- If errors are encountered during the decoding process,
+-- then they will be returned in the @Left@ clause of the
+-- coproduct. See: <https://tools.ietf.org/html/rfc4648#section-8 RFC-4648 section 8>
 --
--- > decode "666f6f"  == ("foo", "")
--- > decode "66quux"  == ("f", "quux")
--- > decode "666quux" == ("f", "6quux")
-decode :: ByteString -> (ByteString, ByteString)
-decode (PS sfp soff slen) =
-  unsafePerformIO . createAndTrim' (slen `div` 2) $ \dptr ->
-      withForeignPtr sfp $ \sptr ->
-        dec (sptr `plusPtr` soff) dptr
- where
-  dec sptr = go sptr where
-    e = sptr `plusPtr` if odd slen then slen - 1 else slen
-    go s d | s == e = let len = e `minusPtr` sptr
-                      in return (0, len `div` 2, ps sfp (soff+len) (slen-len))
-           | otherwise = do
-      hi <- hex `fmap` peek8 s
-      lo <- hex `fmap` peek8 (s `plusPtr` 1)
-      if lo == 0xff || hi == 0xff
-        then let len = s `minusPtr` sptr
-             in return (0, len `div` 2, ps sfp (soff+len) (slen-len))
-        else do
-          poke d . fromIntegral $ lo + (hi `shiftL` 4)
-          go (s `plusPtr` 2) (d `plusPtr` 1)
+--
+-- === __Examples__:
+--
+-- > decode "666f6f"  == Right "foo"
+-- > decode "66quux"  == Left "invalid character at offset: 2"
+-- > decode "666quux" == Left "invalid character at offset: 3"
+--
+-- @since 1.0.0.0
+--
+decode :: ByteString -> Either String ByteString
+decode (PS sfp soff slen)
+    | slen == 0 = Right empty
+    | r /= 0 = Left "invalid bytestring size"
+    | otherwise = unsafeDupablePerformIO $ do
+      dfp <- mallocPlainForeignPtrBytes q
+      withForeignPtr dfp $ \dptr ->
+        withForeignPtr sfp $ \sptr ->
+          decodeLoop dfp dptr
+          (plusPtr sptr soff)
+          (plusPtr sptr (soff + slen))
+  where
+    !q = slen `quot` 2
+    !r = slen `rem` 2
 
-    hex (I# index) = W8# (indexWord8OffAddr# table index)
-    !table =
-        "\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\
-        \\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\
-        \\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\
-        \\x00\x01\x02\x03\x04\x05\x06\x07\x08\x09\xff\xff\xff\xff\xff\xff\
-        \\xff\x0a\x0b\x0c\x0d\x0e\x0f\xff\xff\xff\xff\xff\xff\xff\xff\xff\
-        \\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\
-        \\xff\x0a\x0b\x0c\x0d\x0e\x0f\xff\xff\xff\xff\xff\xff\xff\xff\xff\
-        \\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\
-        \\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\
-        \\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\
-        \\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\
-        \\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\
-        \\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\
-        \\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\
-        \\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\
-        \\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff"#
-
-peek8 :: Ptr Word8 -> IO Int
-peek8 p = fromIntegral `fmap` peek p
-
-ps :: ForeignPtr Word8 -> Int -> Int -> ByteString
-ps fp off len
-    | len <= 0 = empty
-    | otherwise = PS fp off len
+-- | Decode a Base16-encoded 'ByteString' value leniently, using a
+-- strategy that never fails.
+--
+-- /N.B./: this is not RFC 4648-compliant
+--
+-- === __Examples__:
+--
+-- > decodeLenient "666f6f"  == "foo"
+-- > decodeLenient "66quuxx" == "f"
+-- > decodeLenient "666quux" == "f"
+-- > decodeLenient "666fquu" -- "fo"
+--
+-- @since 1.0.0.0
+--
+decodeLenient :: ByteString -> ByteString
+decodeLenient (PS !sfp !soff !slen)
+    | slen == 0 = empty
+    | otherwise = unsafeDupablePerformIO $ do
+      dfp <- mallocPlainForeignPtrBytes (q * 2)
+      withForeignPtr dfp $ \dptr ->
+        withForeignPtr sfp $ \sptr ->
+          lenientLoop
+            dfp
+            dptr
+            (plusPtr sptr soff)
+            (plusPtr sptr (soff + slen))
+  where
+    !q = slen `quot` 2
