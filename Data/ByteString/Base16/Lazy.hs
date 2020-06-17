@@ -15,6 +15,7 @@
 -- Portability : non-portable
 --
 -- RFC 4648-compliant Base16 (Hexadecimal) encoding for lazy 'ByteString' values.
+-- For a complete Base16 encoding specification, please see <https://tools.ietf.org/html/rfc4648#section-8 RFC-4648 section 8>.
 --
 module Data.ByteString.Base16.Lazy
 ( encode
@@ -31,7 +32,7 @@ import Data.ByteString.Lazy.Internal (ByteString(..))
 
 -- | Encode a 'ByteString' value in base16 (i.e. hexadecimal).
 -- Encoded values will always have a length that is a multiple of 2.
--- See: <https://tools.ietf.org/html/rfc4648#section-8 RFC-4648 section 8>
+--
 --
 -- === __Examples__:
 --
@@ -42,10 +43,9 @@ encode Empty = Empty
 encode (Chunk c cs) = Chunk (B16.encode c) (encode cs)
 
 -- | Decode a base16-encoded 'ByteString' value.
---
 -- If errors are encountered during the decoding process,
--- then they will be returned in the @Left@ clause of the
--- coproduct. See: <https://tools.ietf.org/html/rfc4648#section-8 RFC-4648 section 8>
+-- then an error message and character offset will be returned in
+-- the @Left@ clause of the coproduct.
 --
 -- === __Examples__:
 --
