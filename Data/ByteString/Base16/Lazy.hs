@@ -56,12 +56,10 @@ encode (Chunk c cs) = Chunk (B16.encode c) (encode cs)
 -- @since 1.0.0.0
 --
 decode :: ByteString -> Either String ByteString
-decode Empty = Right Empty
-decode (Chunk b bs) = case B16.decode b of
-    Right b' -> case decode bs of
-      Left t -> Left t
-      Right bs' -> Right (Chunk b' bs')
-    Left t -> Left t
+decode = fmap (LBS.fromChunks . (:[]))
+    . B16.decode
+    . BS.concat
+    . LBS.toChunks
 
 -- | Decode a Base16-encoded 'ByteString' value leniently, using a
 -- strategy that never fails.
