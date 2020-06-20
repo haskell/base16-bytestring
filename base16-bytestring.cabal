@@ -1,4 +1,4 @@
-cabal-version:       >=1.8
+cabal-version:       1.12
 name:                base16-bytestring
 version:             0.1.1.7
 synopsis:            Fast base16 (hex) encoding and decoding for ByteStrings
@@ -37,6 +37,7 @@ library
     ghc-prim
 
   ghc-options: -Wall -funbox-strict-fields
+  default-language: Haskell2010
 
 source-repository head
   type:     git
@@ -46,6 +47,7 @@ test-suite test
   type: exitcode-stdio-1.0
   hs-source-dirs: tests
   main-is: Tests.hs
+  default-language: Haskell2010
   build-depends: base
                , base16-bytestring
                , bytestring

@@ -30,5 +30,5 @@ Master [Git repository](http://github.com/haskell/base16-bytestring):
 # Authors
 
 This library is written by [Bryan O'Sullivan](mailto:bos@serpentine.com). It
-is maintained by [Herbert Valerio Riedel](mailto:hvr@gnu.org) and [Mikhail
+is maintained by [Emily Pillmore](mailto:emilypi@cohomolo.gy), [Herbert Valerio Riedel](mailto:hvr@gnu.org) and [Mikhail
 Glushenkov](mailto:mikhail.glushenkov@gmail.com).
