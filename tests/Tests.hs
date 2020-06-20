@@ -47,9 +47,7 @@ properties
   => Impl bs
   -> Test
 properties (Impl label e d l _) = testGroup label
-  [ testProperty "decode-encode" $ \a -> case d (e a) of
-      Left _ -> False
-      Right a' -> a == a'
+  [ testProperty "decode-encode" $ \a -> Right a == d (e a)
   , testProperty "lenient-encode" $ \a -> a == l (e a)
   , testProperty "decode-encode-encode" $ \a -> Right (e a) == d (e (e a))
   , testProperty "lenient-encode-encode" $ \a -> e a == l (e (e a))
@@ -65,19 +63,19 @@ units
 units (Impl label e d l td) = testGroup label $ encs ++ decs ++ lens
   where
     encs =
-      [ testCase ("base16: encode " ++ show raw) (enc @?= rawEnc)
+      [ testCase ("encode: " ++ show raw) (enc @?= rawEnc)
       | (raw, rawEnc) <- td
       , let enc = e raw
       ]
 
     decs =
-      [ testCase ("base16: decode " ++ show rawEnc) (dec_enc @?= Right raw)
+      [ testCase ("decode: " ++ show rawEnc) (dec_enc @?= Right raw)
       | (raw, rawEnc) <- td
       , let dec_enc = d rawEnc
       ]
 
     lens =
-      [ testCase ("base16: lenient " ++ show rawEnc) (len_enc @?= raw)
+      [ testCase ("lenient: " ++ show rawEnc) (len_enc @?= raw)
       | (raw, rawEnc) <- td
       , let len_enc = l rawEnc
       ]
@@ -125,7 +123,7 @@ b16 = Impl "base16-strict" B16.encode B16.decode B16.decodeLenient rfcVectors
 
 
 lb16 :: Impl LBS.ByteString
-lb16 = Impl "base16-strict" LB16.encode LB16.decode LB16.decodeLenient rfcVectors
+lb16 = Impl "base16-lazy" LB16.encode LB16.decode LB16.decodeLenient rfcVectors
 
 instance Arbitrary BS.ByteString where
   arbitrary = liftM BS.pack arbitrary
