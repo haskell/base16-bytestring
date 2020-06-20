@@ -1,4 +1,4 @@
-cabal-version:       >=1.8
+cabal-version:       >=1.12
 name:                base16-bytestring
 version:             0.1.1.7
 synopsis:            Fast base16 (hex) encoding and decoding for ByteStrings
