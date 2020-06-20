@@ -1,4 +1,4 @@
-cabal-version:      >=1.12
+cabal-version:      1.12
 name:               base16-bytestring
 version:            1.0.0.0
 synopsis:           RFC 4648-compliant Base16 encodings for ByteStrings
