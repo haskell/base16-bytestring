@@ -7,7 +7,7 @@ description:
   to @base16@ (see also <https://tools.ietf.org/html/rfc4648 RFC 4648>) for
   strict (see "Data.ByteString.Base16") and lazy @ByteString@s (see "Data.ByteString.Base16.Lazy").
   .
-  See also the <https://hackage.haskell.org/package/base-encoding base-encoding> package which
+  See the <https://hackage.haskell.org/package/base16 base16> package which provides superior encoding and decoding performance as well as support for lazy, short, and strict variants of 'Text' and 'ByteString' values. Additionally, see the <https://hackage.haskell.org/package/base-encoding base-encoding> package which
   provides an uniform API providing conversion paths between more binary and textual types.
 
 homepage:           http://github.com/haskell/base16-bytestring
