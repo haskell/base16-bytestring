@@ -42,14 +42,16 @@ tested-with:
    || ==8.4.4
    || ==8.6.5
    || ==8.8.3
+   || ==8.8.4
    || ==8.10.1
+   || ==8.10.2
 
 source-repository head
   type:     git
   location: http://github.com/haskell/base16-bytestring
 
 library
-  other-modules:   Data.ByteString.Base16.Internal
+  other-modules:    Data.ByteString.Base16.Internal
   exposed-modules:
     Data.ByteString.Base16
     Data.ByteString.Base16.Lazy
@@ -58,7 +60,7 @@ library
       base        >=4   && <5
     , bytestring  >=0.9 && <0.11
 
-  ghc-options:     -Wall -funbox-strict-fields
+  ghc-options:      -Wall -funbox-strict-fields
   default-language: Haskell2010
 
 test-suite test
@@ -72,8 +74,8 @@ test-suite test
     , HUnit
     , QuickCheck
     , test-framework
-    , test-framework-quickcheck2
     , test-framework-hunit
+    , test-framework-quickcheck2
 
   default-language: Haskell2010
 
