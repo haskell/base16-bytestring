@@ -106,7 +106,7 @@ decodeLenient (PS !sfp !soff !slen)
       withForeignPtr dfp $ \dptr ->
         withForeignPtr sfp $ \sptr ->
           lenientLoop dfp dptr
-            (plusPtr sptr soff)
-            (plusPtr sptr (soff + slen))
+          (plusPtr sptr soff)
+          (plusPtr sptr (soff + slen))
   where
     !q = slen `quot` 2
