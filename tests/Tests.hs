@@ -7,11 +7,13 @@ module Main
 import Control.Monad (liftM)
 
 import qualified Data.ByteString as BS
+import Data.ByteString.Internal (c2w, w2c)
 import Data.ByteString.Char8 ()
 import qualified Data.ByteString.Base16 as B16
 import qualified Data.ByteString.Base16.Lazy as LB16
 import qualified Data.ByteString.Lazy as LBS
 import Data.ByteString.Lazy.Char8 ()
+import Data.Char (toUpper)
 import Data.String
 
 import Test.Framework (Test, defaultMain, testGroup)
@@ -46,9 +48,11 @@ properties
      )
   => Impl bs
   -> Test
-properties (Impl label e d l _) = testGroup label
-  [ testProperty "decode-encode" $ \a -> Right a == d (e a)
-  , testProperty "lenient-encode" $ \a -> a == l (e a)
+properties (Impl label e d l _ u) = testGroup label
+  [ testProperty "decode-encode-lower" $ \a -> Right a == d (e a)
+  , testProperty "decode-encode-upper" $ \a -> Right a == d (u . e $ a)
+  , testProperty "lenient-encode-lower" $ \a -> a == l (e a)
+  , testProperty "lenient-encode-upper" $ \a -> a == l (u . e $ a)
   , testProperty "decode-encode-encode" $ \a -> Right (e a) == d (e (e a))
   , testProperty "lenient-encode-encode" $ \a -> e a == l (e (e a))
   ]
@@ -60,28 +64,30 @@ units
      )
   => Impl bs
   -> Test
-units (Impl label e d l td) = testGroup label $ encs ++ decs ++ lens
+units (Impl label e d l td u) = testGroup label $ encs ++ decs ++ lens
   where
     encs =
-      [ testCase ("encode: " ++ show raw) (enc @?= rawEnc)
+      [ testCase ("encode: " ++ show raw) $ do enc @?= rawEnc
       | (raw, rawEnc) <- td
       , let enc = e raw
       ]
 
     decs =
-      [ testCase ("decode: " ++ show rawEnc) (dec_enc @?= Right raw)
+      [ testCase ("decode: " ++ show rawEnc) $ do dec_enc @?= Right raw; dec_upp @?= Right raw
       | (raw, rawEnc) <- td
       , let dec_enc = d rawEnc
+      , let dec_upp = d (u rawEnc)
       ]
 
     lens =
-      [ testCase ("lenient: " ++ show rawEnc) (len_enc @?= raw)
+      [ testCase ("lenient: " ++ show rawEnc) $ do len_enc @?= raw; len_upp @?= raw
       | (raw, rawEnc) <- td
       , let len_enc = l rawEnc
+      , let len_upp = l (u rawEnc)
       ]
 
 lenientUnits :: (IsString bs, Show bs, Eq bs) => Impl bs -> Test
-lenientUnits (Impl label e d l _) = testGroup (label ++ " lenient unit tests")
+lenientUnits (Impl label e d l _ _) = testGroup (label ++ " lenient unit tests")
   [ testCaseB16 "" ""
   , testCaseB16 "f" "6+++++++____++++++======*%$@#%#^*$^6"
   , testCaseB16 "fo" "6$6+6|f"
@@ -116,14 +122,15 @@ data Impl bs = Impl
   , _decode :: bs -> Either String bs
   , _lenient :: bs -> bs
   , _data :: [(bs, bs)]
+  , _upper :: bs -> bs
   }
 
 b16 :: Impl BS.ByteString
-b16 = Impl "base16-strict" B16.encode B16.decode B16.decodeLenient rfcVectors
+b16 = Impl "base16-strict" B16.encode B16.decode B16.decodeLenient rfcVectors (BS.map (c2w . toUpper . w2c))
 
 
 lb16 :: Impl LBS.ByteString
-lb16 = Impl "base16-lazy" LB16.encode LB16.decode LB16.decodeLenient rfcVectors
+lb16 = Impl "base16-lazy" LB16.encode LB16.decode LB16.decodeLenient rfcVectors (LBS.map (c2w . toUpper . w2c))
 
 instance Arbitrary BS.ByteString where
   arbitrary = liftM BS.pack arbitrary

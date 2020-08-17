@@ -79,7 +79,7 @@ decodeLenient :: ByteString -> ByteString
 decodeLenient = LBS.fromChunks
     . fmap B16.decodeLenient
     . reChunk
-    . fmap (BS.filter (flip BS.elem hex))
+    . fmap (BS.filter (flip BS.elem extendedHex))
     . LBS.toChunks
   where
-    hex = BS.pack (fmap c2w "0123456789abcdef")
+    extendedHex = BS.pack (fmap c2w "0123456789abcdefABCDEF")
