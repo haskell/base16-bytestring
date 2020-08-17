@@ -105,9 +105,7 @@ decodeLenient (PS !sfp !soff !slen)
       dfp <- mallocPlainForeignPtrBytes (q * 2)
       withForeignPtr dfp $ \dptr ->
         withForeignPtr sfp $ \sptr ->
-          lenientLoop
-            dfp
-            dptr
+          lenientLoop dfp dptr
             (plusPtr sptr soff)
             (plusPtr sptr (soff + slen))
   where
