@@ -25,19 +25,13 @@ module Data.ByteString.Base16
 ) where
 
 import Data.ByteString (empty)
-import Data.ByteString.Base16.Internal
-import Data.ByteString.Internal
+import Data.ByteString.Base16.Internal (encodeLoop, decodeLoop, lenientLoop, mkBS, withBS)
+import Data.ByteString.Internal (ByteString)
 
-import Foreign.ForeignPtr
-import Foreign.Ptr
+import Foreign.ForeignPtr (withForeignPtr)
+import Foreign.Ptr (plusPtr)
 
-import GHC.ForeignPtr
-#if __GLASGOW_HASKELL__ >= 702
-import System.IO.Unsafe (unsafeDupablePerformIO)
-#else
-import GHC.IO (unsafeDupablePerformIO)
-#endif
-
+import GHC.ForeignPtr (mallocPlainForeignPtrBytes)
 
 -- | Encode a 'ByteString' value in base16 (i.e. hexadecimal).
 -- Encoded values will always have a length that is a multiple of 2.
@@ -47,14 +41,17 @@ import GHC.IO (unsafeDupablePerformIO)
 -- > encode "foo"  == "666f6f"
 --
 encode :: ByteString -> ByteString
-encode (PS sfp soff slen)
-    | slen > maxBound `div` 2 =
-      error "Data.ByteString.Base16.encode: input too long"
-    | otherwise = unsafeCreate (slen * 2) $ \dptr ->
-        withForeignPtr sfp $ \sptr ->
-          encodeLoop dptr
-          (sptr `plusPtr` soff)
-          (sptr `plusPtr` (soff + slen))
+encode bs = withBS bs go
+  where
+    go !sptr !slen
+      | slen > maxBound `div` 2 =
+        error "Data.ByteString.Base16.encode: input too long"
+      | otherwise = do
+          let l = slen * 2
+          dfp <- mallocPlainForeignPtrBytes l
+          withForeignPtr dfp $ \dptr ->
+            encodeLoop dptr sptr (sptr `plusPtr` slen)
+          return $ mkBS dfp l
 
 -- | Decode a base16-encoded 'ByteString' value.
 -- If errors are encountered during the decoding process,
@@ -70,19 +67,18 @@ encode (PS sfp soff slen)
 -- @since 1.0.0.0
 --
 decode :: ByteString -> Either String ByteString
-decode (PS sfp soff slen)
-    | slen == 0 = Right empty
-    | r /= 0 = Left "invalid bytestring size"
-    | otherwise = unsafeDupablePerformIO $ do
-      dfp <- mallocPlainForeignPtrBytes q
-      withForeignPtr dfp $ \dptr ->
-        withForeignPtr sfp $ \sptr ->
-          decodeLoop dfp dptr
-          (plusPtr sptr soff)
-          (plusPtr sptr (soff + slen))
+decode bs = withBS bs go
   where
-    !q = slen `quot` 2
-    !r = slen `rem` 2
+    go !sptr !slen
+      | slen == 0 = return $ Right empty
+      | r /= 0 = return $ Left "invalid bytestring size"
+      | otherwise = do
+        dfp <- mallocPlainForeignPtrBytes q
+        withForeignPtr dfp $ \dptr ->
+          decodeLoop dfp dptr sptr (plusPtr sptr slen)
+      where
+        !q = slen `quot` 2
+        !r = slen `rem` 2
 
 -- | Decode a Base16-encoded 'ByteString' value leniently, using a
 -- strategy that never fails.
@@ -99,14 +95,13 @@ decode (PS sfp soff slen)
 -- @since 1.0.0.0
 --
 decodeLenient :: ByteString -> ByteString
-decodeLenient (PS !sfp !soff !slen)
-    | slen == 0 = empty
-    | otherwise = unsafeDupablePerformIO $ do
-      dfp <- mallocPlainForeignPtrBytes (q * 2)
-      withForeignPtr dfp $ \dptr ->
-        withForeignPtr sfp $ \sptr ->
-          lenientLoop dfp dptr
-          (plusPtr sptr soff)
-          (plusPtr sptr (soff + slen))
+decodeLenient bs = withBS bs go
   where
-    !q = slen `quot` 2
+    go !sptr !slen
+      | slen == 0 = return empty
+      | otherwise = do
+        dfp <- mallocPlainForeignPtrBytes (q * 2)
+        withForeignPtr dfp $ \dptr ->
+          lenientLoop dfp dptr sptr (plusPtr sptr slen)
+      where
+        !q = slen `quot` 2
