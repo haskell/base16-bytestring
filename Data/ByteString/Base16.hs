@@ -47,7 +47,7 @@ encode bs = withBS bs go
       | slen > maxBound `div` 2 =
         error "Data.ByteString.Base16.encode: input too long"
       | otherwise = do
-          let !l = slen * 2
+          let l = slen * 2
           dfp <- mallocPlainForeignPtrBytes l
           withForeignPtr dfp $ \dptr ->
             encodeLoop dptr sptr (sptr `plusPtr` slen)
