@@ -1,3 +1,7 @@
+# 1.0.1.0
+
+* Backwards-compatible support for `bytestring ^>= 0.11` ([#15](https://github.com/haskell/base16-bytestring/pull/15)) 
+
 # 1.0.0.0
 
 * Merged omnibus PR doing a variety of things in ([#10](https://github.com/haskell/base16-bytestring/pull/10)):
