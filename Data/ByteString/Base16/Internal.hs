@@ -10,13 +10,12 @@ module Data.ByteString.Base16.Internal
 , c2w
 , aix
 , reChunk
-, unsafeShiftR
 , withBS
 , mkBS
 ) where
 
 
-import Data.Bits ((.&.), (.|.))
+import Data.Bits ((.&.), (.|.), unsafeShiftR)
 import qualified Data.ByteString as B
 import Data.ByteString.Internal (ByteString(..))
 import Data.Char (ord)
@@ -26,7 +25,7 @@ import Foreign.Ptr (Ptr, minusPtr, plusPtr)
 import Foreign.Storable (Storable(poke, peek))
 
 import GHC.Word (Word8(..))
-import GHC.Exts (Int(I#), Addr#, indexWord8OffAddr#, word2Int#, uncheckedShiftRL#)
+import GHC.Exts (Int(I#), Addr#, indexWord8OffAddr#)
 
 #if __GLASGOW_HASKELL__ >= 702
 import System.IO.Unsafe (unsafeDupablePerformIO)
@@ -135,7 +134,9 @@ lenientLoop !dfp !dptr !sptr !end = goHi dptr sptr 0
 -- Utils
 
 aix :: Word8 -> Addr# -> Word8
-aix (W8# w) table = W8# (indexWord8OffAddr# table (word2Int# w))
+aix w table = W8# (indexWord8OffAddr# table i)
+  where
+    !(I# i) = fromIntegral w
 {-# INLINE aix #-}
 
 -- | Form a list of chunks, and rechunk the list of bytestrings
@@ -156,10 +157,6 @@ reChunk (c:cs) = case B.length c `divMod` 2 of
             let as' = if B.null y then as else y:as
             in q' : reChunk as'
           else cont_ q' as
-
-unsafeShiftR :: Word8 -> Int -> Word8
-unsafeShiftR (W8# x#) (I# i#) = W8# (x# `uncheckedShiftRL#` i#)
-{-# INLINE unsafeShiftR #-}
 
 c2w :: Char -> Word8
 c2w = fromIntegral . ord
