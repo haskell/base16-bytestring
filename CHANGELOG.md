@@ -1,6 +1,10 @@
+# 1.0.2.0
+
+* Support sized primitive types in GHC 9.2 ([#16](https://github.com/haskell/base16-bytestring/pull/16) - thanks Bodigrim!)
+
 # 1.0.1.0
 
-* Backwards-compatible support for `bytestring ^>= 0.11` ([#15](https://github.com/haskell/base16-bytestring/pull/15)) 
+* Backwards-compatible support for `bytestring ^>= 0.11` ([#15](https://github.com/haskell/base16-bytestring/pull/15))
 
 # 1.0.0.0
 
