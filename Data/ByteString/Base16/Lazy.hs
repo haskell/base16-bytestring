@@ -15,7 +15,7 @@
 -- Portability : non-portable
 --
 -- RFC 4648-compliant Base16 (Hexadecimal) encoding for lazy 'ByteString' values.
--- For a complete Base16 encoding specification, please see <https://tools.ietf.org/html/rfc4648#section-8 RFC-4648 section 8>.
+-- For a complete Base16 encoding specification, please see <https://datatracker.ietf.org/doc/html/rfc4648#section-8 RFC-4648 section 8>.
 --
 module Data.ByteString.Base16.Lazy
 ( encode
