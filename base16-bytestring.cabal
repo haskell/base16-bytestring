@@ -1,6 +1,7 @@
 cabal-version:      1.12
 name:               base16-bytestring
 version:            1.0.2.0
+x-revision:         1
 synopsis:           RFC 4648-compliant Base16 encodings for ByteStrings
 description:
   This package provides support for encoding and decoding binary data according
@@ -31,13 +32,17 @@ extra-source-files:
   CHANGELOG.md
 
 tested-with:
-  GHC ==8.0.2
-   || ==8.2.2
-   || ==8.4.4
-   || ==8.6.5
-   || ==8.8.4
-   || ==8.10.4
-   || ==9.0.1
+  GHC == 9.8.0
+  GHC == 9.6.3
+  GHC == 9.4.7
+  GHC == 9.2.8
+  GHC == 9.0.2
+  GHC == 8.10.7
+  GHC == 8.8.4
+  GHC == 8.6.5
+  GHC == 8.4.4
+  GHC == 8.2.2
+  GHC == 8.0.2
 
 source-repository head
   type:     git
@@ -51,7 +56,7 @@ library
 
   build-depends:
       base        >=4.9 && <5
-    , bytestring  >=0.9 && <0.12
+    , bytestring  >=0.9 && <0.13
 
   ghc-options:      -Wall -funbox-strict-fields
   default-language: Haskell2010

@@ -1,0 +1,11 @@
+branches: master
+installed: +all
+
+constraint-set bytestring-0.12
+  constraints: bytestring >= 0.12
+  ghc: >= 8.2 && < 9.7
+  tests: True
+  run-tests: True
+
+raw-project
+  allow-newer: bytestring
